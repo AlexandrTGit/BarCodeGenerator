@@ -5,206 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barcode Generator | Royal Drugs</title>
     
-    <!-- JsBarcode library for barcode generation -->
+    <!-- JsBarcode library -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
-    <!-- Используем максимально стабильную версию 7.8.2 для работы в Safari -->
-    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <!-- Стабильная версия docx (7.8.2) + сброс кэша Safari (?v=new) -->
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js?v=new"></script>
     
     <style>
-        /* Base styles */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Header */
-        header {
-            background-color: #ffffff;
-            border-bottom: 4px solid #004a8f;
-            padding: 15px 50px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-
-        /* Logo image styling */
-        .logo-img {
-            height: 55px;
-            object-fit: contain;
-        }
-
-        /* Main content */
-        main {
-            flex-grow: 1;
-            padding: 50px 20px;
-            max-width: 1100px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            margin-bottom: 40px;
-            text-align: center;
-            border: 1px solid #edf2f7;
-        }
-
-        h1 {
-            color: #004a8f;
-            margin-bottom: 15px;
-            font-size: 28px;
-        }
-
-        p.subtitle {
-            color: #64748b;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-
-        /* Inputs and Buttons */
-        .input-group {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            max-width: 600px;
-            margin: 0 auto 5px auto;
-        }
-
-        input[type="text"] {
-            flex-grow: 1;
-            padding: 15px 20px;
-            font-size: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: #004a8f;
-        }
-
-        button.btn-primary {
-            background-color: #004a8f;
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            white-space: nowrap;
-        }
-
-        button.btn-primary:hover {
-            background-color: #00366b;
-        }
-
-        button.btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .error-msg {
-            color: #e53e3e;
-            font-size: 14px;
-            height: 20px;
-            font-weight: 500;
-            margin-top: 10px;
-        }
-
-        /* Barcode Grid */
-        .barcode-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .barcode-item {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .barcode-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-        }
-
-        .barcode-item canvas {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 25px;
-        }
-
-        .download-btn {
-            background-color: #f1f5f9;
-            color: #004a8f;
-            width: 100%;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .download-btn:hover {
-            background-color: #e2e8f0;
-            color: #00366b;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #002b5e;
-            color: #ffffff;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: auto;
-        }
-        
-        footer p {
-            font-size: 14px;
-            color: #cbd5e1;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .input-group {
-                flex-direction: column;
-            }
-            header {
-                padding: 15px 20px;
-                justify-content: center;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: #f8fafc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: #ffffff; border-bottom: 4px solid #004a8f; padding: 15px 50px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .logo-container { display: flex; align-items: center; text-decoration: none; }
+        .logo-img { height: 55px; object-fit: contain; }
+        main { flex-grow: 1; padding: 50px 20px; max-width: 1100px; margin: 0 auto; width: 100%; }
+        .card { background: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 40px; text-align: center; border: 1px solid #edf2f7; }
+        h1 { color: #004a8f; margin-bottom: 15px; font-size: 28px; }
+        p.subtitle { color: #64748b; margin-bottom: 30px; font-size: 16px; }
+        .input-group { display: flex; justify-content: center; gap: 15px; max-width: 600px; margin: 0 auto 5px auto; }
+        input[type="text"] { flex-grow: 1; padding: 15px 20px; font-size: 16px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; transition: border-color 0.3s ease; }
+        input[type="text"]:focus { border-color: #004a8f; }
+        button.btn-primary { background-color: #004a8f; color: white; border: none; padding: 15px 35px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background-color 0.3s ease, transform 0.1s ease; white-space: nowrap; }
+        button.btn-primary:hover { background-color: #00366b; }
+        button.btn-primary:active { transform: scale(0.98); }
+        .error-msg { color: #e53e3e; font-size: 14px; height: 20px; font-weight: 500; margin-top: 10px; }
+        .barcode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .barcode-item { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .barcode-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .barcode-item canvas { max-width: 100%; height: auto; margin-bottom: 25px; }
+        .download-btn { background-color: #f1f5f9; color: #004a8f; width: 100%; padding: 12px; font-size: 14px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease; }
+        .download-btn:hover { background-color: #e2e8f0; color: #00366b; }
+        footer { background-color: #002b5e; color: #ffffff; text-align: center; padding: 30px 20px; margin-top: auto; }
+        footer p { font-size: 14px; color: #cbd5e1; margin-bottom: 10px; }
+        @media (max-width: 768px) { .input-group { flex-direction: column; } header { padding: 15px 20px; justify-content: center; } }
     </style>
 </head>
 <body>
@@ -227,9 +59,7 @@
             <div id="errorMsg" class="error-msg"></div>
         </div>
 
-        <div id="barcodeGrid" class="barcode-grid">
-            <!-- Generated barcodes will appear here -->
-        </div>
+        <div id="barcodeGrid" class="barcode-grid"></div>
     </main>
 
     <footer>
@@ -237,23 +67,15 @@
         <p style="font-size: 12px; opacity: 0.7;">Internal Barcode Generator Tool</p>
     </footer>
 
-    <!-- Scripts -->
     <script>
         function generateBarcode() {
             const inputField = document.getElementById('barcodeInput');
             const value = inputField.value.trim();
             const errorMsg = document.getElementById('errorMsg');
 
-            if (!value) {
-                errorMsg.textContent = 'Please enter a value for the barcode.';
-                return;
-            }
-
-            if (!/^\d+$/.test(value)) {
-                errorMsg.textContent = 'Only digits are allowed. Please check your input.';
-                return;
-            }
-
+            if (!value) { errorMsg.textContent = 'Please enter a value for the barcode.'; return; }
+            if (!/^\d+$/.test(value)) { errorMsg.textContent = 'Only digits are allowed. Please check your input.'; return; }
+            
             errorMsg.textContent = ''; 
 
             const grid = document.getElementById('barcodeGrid');
@@ -285,15 +107,15 @@
             
             downloadBtn.onclick = async function() {
                 try {
-                    // Проверяем загрузилась ли библиотека docx
+                    // Проверка загрузилась ли библиотека корректно
                     if (typeof docx === 'undefined') {
-                        throw new Error("The docx library is not loaded. Please check your internet connection or disable ad-blockers.");
+                        throw new Error("The docx library failed to load. Check your internet connection.");
                     }
 
                     downloadBtn.textContent = 'Generating...';
                     downloadBtn.style.opacity = '0.7';
 
-                    // 1. Конвертация картинки вручную без fetch() во избежание блокировок Safari
+                    // Подготавливаем картинку
                     const dataUrl = canvas.toDataURL('image/png');
                     const base64 = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
                     const binaryString = window.atob(base64);
@@ -303,7 +125,7 @@
                         bytes[i] = binaryString.charCodeAt(i);
                     }
 
-                    // 2. Создание документа Word (формат API версии 7.8.2)
+                    // Создаем документ (формат docx v7.8.2)
                     const doc = new docx.Document({
                         sections: [{
                             children: [
@@ -323,29 +145,26 @@
                         }]
                     });
 
-                    // 3. Создаем Blob
+                    // Генерируем и скачиваем
                     const blob = await docx.Packer.toBlob(doc);
-
-                    // 4. Скачивание
                     const url = URL.createObjectURL(blob);
+                    
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = `royaldrugs-barcode-${value}.docx`;
                     document.body.appendChild(link);
                     link.click();
                     
-                    // Убираем за собой
+                    // Очистка
                     document.body.removeChild(link);
-                    setTimeout(() => URL.revokeObjectURL(url), 1000); // Тайм-аут для Safari
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
                     
                     downloadBtn.textContent = 'Download (DOCX)';
                     downloadBtn.style.opacity = '1';
                     
                 } catch (err) {
                     console.error(err);
-                    // ТЕПЕРЬ ОШИБКА ВЫВЕДЕТ КОНКРЕТНУЮ ПРИЧИНУ
-                    alert("System Error: " + (err.message || "Unknown error occurred"));
-                    
+                    alert("System Error: " + err.message);
                     downloadBtn.textContent = 'Download (DOCX)';
                     downloadBtn.style.opacity = '1';
                 }
@@ -359,9 +178,7 @@
         }
 
         document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateBarcode();
-            }
+            if (e.key === 'Enter') { generateBarcode(); }
         });
     </script>
 </body>
