@@ -209,15 +209,12 @@
 </head>
 <body>
 
-    <!-- Header -->
     <header>
         <a href="#" class="logo-container">
-            <!-- Local logo file -->
             <img src="logo.png" alt="Royal Drugs Logo" class="logo-img">
         </a>
     </header>
 
-    <!-- Main Content -->
     <main>
         <div class="card">
             <h1>Barcode Generator</h1>
@@ -235,7 +232,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>© 2026 Royal Drugs. All Rights Reserved.</p>
         <p style="font-size: 12px; opacity: 0.7;">Internal Barcode Generator Tool</p>
@@ -248,30 +244,25 @@
             const value = inputField.value.trim();
             const errorMsg = document.getElementById('errorMsg');
 
-            // Validation: Check if empty
             if (!value) {
                 errorMsg.textContent = 'Please enter a value for the barcode.';
                 return;
             }
 
-            // Validation: Check if numbers only
             if (!/^\d+$/.test(value)) {
                 errorMsg.textContent = 'Only digits are allowed. Please check your input.';
                 return;
             }
 
-            errorMsg.textContent = ''; // Clear error
+            errorMsg.textContent = ''; 
 
-            // Create grid item
             const grid = document.getElementById('barcodeGrid');
             const item = document.createElement('div');
             item.className = 'barcode-item';
 
-            // Create canvas for barcode
             const canvas = document.createElement('canvas');
             item.appendChild(canvas);
 
-            // Generate barcode on canvas
             try {
                 JsBarcode(canvas, value, {
                     format: "CODE128",       
@@ -288,38 +279,34 @@
                 return;
             }
 
-            // Create download button for DOCX
             const downloadBtn = document.createElement('button');
             downloadBtn.className = 'download-btn';
             downloadBtn.textContent = 'Download (DOCX)';
             
-            // Logic for generating and downloading DOCX file
+            // ОБНОВЛЕННАЯ ЛОГИКА СОЗДАНИЯ DOCX
             downloadBtn.onclick = async function() {
                 try {
                     downloadBtn.textContent = 'Generating...';
                     downloadBtn.style.opacity = '0.7';
 
-                    // 1. Get image from canvas as Base64 string
-                    const base64Data = canvas.toDataURL('image/png').split(',')[1];
+                    // 1. Получаем картинку с canvas (Data URL)
+                    const dataUrl = canvas.toDataURL('image/png');
                     
-                    // 2. Convert Base64 to Uint8Array (required by docx library)
-                    const byteString = atob(base64Data);
-                    const arrayBuffer = new ArrayBuffer(byteString.length);
-                    const uint8Array = new Uint8Array(arrayBuffer);
-                    for (let i = 0; i < byteString.length; i++) {
-                        uint8Array[i] = byteString.charCodeAt(i);
-                    }
+                    // 2. Чистая браузерная конвертация в ArrayBuffer через fetch()
+                    const response = await fetch(dataUrl);
+                    const arrayBuffer = await response.arrayBuffer();
 
-                    // 3. Create a new Microsoft Word Document
+                    // 3. Создаем документ Word
                     const doc = new docx.Document({
                         sections: [{
                             properties: {},
                             children: [
                                 new docx.Paragraph({
-                                    alignment: docx.AlignmentType.CENTER, // Center the image
+                                    alignment: docx.AlignmentType.CENTER, // Выравниваем по центру
                                     children: [
                                         new docx.ImageRun({
-                                            data: uint8Array,
+                                            data: arrayBuffer,
+                                            type: "png", // ЯВНО указываем тип изображения
                                             transformation: {
                                                 width: canvas.width,
                                                 height: canvas.height
@@ -331,10 +318,10 @@
                         }]
                     });
 
-                    // 4. Generate the DOCX file (Blob)
+                    // 4. Генерируем Blob
                     const blob = await docx.Packer.toBlob(doc);
 
-                    // 5. Trigger the download automatically
+                    // 5. Запускаем скачивание
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
@@ -343,10 +330,8 @@
                     link.click();
                     document.body.removeChild(link);
                     
-                    // Cleanup
                     URL.revokeObjectURL(url);
                     
-                    // Reset button
                     downloadBtn.textContent = 'Download (DOCX)';
                     downloadBtn.style.opacity = '1';
                     
@@ -359,15 +344,12 @@
             };
             
             item.appendChild(downloadBtn);
-
-            // Add to the top of the grid
             grid.insertBefore(item, grid.firstChild);
             
             inputField.value = '';
             inputField.focus();
         }
 
-        // Trigger generation on Enter key
         document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 generateBarcode();
