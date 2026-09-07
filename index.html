@@ -8,6 +8,9 @@
     <!-- JsBarcode library for barcode generation -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
+    <!-- docx library for generating Microsoft Word documents -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+    
     <style>
         /* Base styles */
         * {
@@ -43,7 +46,7 @@
 
         /* Logo image styling */
         .logo-img {
-            height: 55px; /* Adjust height based on your original image */
+            height: 55px;
             object-fit: contain;
         }
 
@@ -221,7 +224,7 @@
             <p class="subtitle">Enter a numeric value to generate and save a barcode</p>
             
             <div class="input-group">
-                <input type="text" id="barcodeInput" placeholder="Enter digits (e.g., 123456789123)" autocomplete="off">
+                <input type="text" id="barcodeInput" aria-label="Barcode value input" placeholder="Enter digits (e.g., 123456789123)" autocomplete="off">
                 <button class="btn-primary" onclick="generateBarcode()">Generate</button>
             </div>
             <div id="errorMsg" class="error-msg"></div>
@@ -268,7 +271,7 @@
             const canvas = document.createElement('canvas');
             item.appendChild(canvas);
 
-            // Generate barcode
+            // Generate barcode on canvas
             try {
                 JsBarcode(canvas, value, {
                     format: "CODE128",       
@@ -285,16 +288,74 @@
                 return;
             }
 
-            // Create download button
+            // Create download button for DOCX
             const downloadBtn = document.createElement('button');
             downloadBtn.className = 'download-btn';
-            downloadBtn.textContent = 'Download (PNG)';
+            downloadBtn.textContent = 'Download (DOCX)';
             
-            downloadBtn.onclick = function() {
-                const link = document.createElement('a');
-                link.download = `royaldrugs-barcode-${value}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+            // Logic for generating and downloading DOCX file
+            downloadBtn.onclick = async function() {
+                try {
+                    downloadBtn.textContent = 'Generating...';
+                    downloadBtn.style.opacity = '0.7';
+
+                    // 1. Get image from canvas as Base64 string
+                    const base64Data = canvas.toDataURL('image/png').split(',')[1];
+                    
+                    // 2. Convert Base64 to Uint8Array (required by docx library)
+                    const byteString = atob(base64Data);
+                    const arrayBuffer = new ArrayBuffer(byteString.length);
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    for (let i = 0; i < byteString.length; i++) {
+                        uint8Array[i] = byteString.charCodeAt(i);
+                    }
+
+                    // 3. Create a new Microsoft Word Document
+                    const doc = new docx.Document({
+                        sections: [{
+                            properties: {},
+                            children: [
+                                new docx.Paragraph({
+                                    alignment: docx.AlignmentType.CENTER, // Center the image
+                                    children: [
+                                        new docx.ImageRun({
+                                            data: uint8Array,
+                                            transformation: {
+                                                width: canvas.width,
+                                                height: canvas.height
+                                            }
+                                        })
+                                    ]
+                                })
+                            ]
+                        }]
+                    });
+
+                    // 4. Generate the DOCX file (Blob)
+                    const blob = await docx.Packer.toBlob(doc);
+
+                    // 5. Trigger the download automatically
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `royaldrugs-barcode-${value}.docx`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Cleanup
+                    URL.revokeObjectURL(url);
+                    
+                    // Reset button
+                    downloadBtn.textContent = 'Download (DOCX)';
+                    downloadBtn.style.opacity = '1';
+                    
+                } catch (err) {
+                    console.error("Error creating DOCX: ", err);
+                    alert("An error occurred while creating the Word document.");
+                    downloadBtn.textContent = 'Download (DOCX)';
+                    downloadBtn.style.opacity = '1';
+                }
             };
             
             item.appendChild(downloadBtn);
