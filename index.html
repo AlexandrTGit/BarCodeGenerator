@@ -8,8 +8,8 @@
     <!-- JsBarcode library for barcode generation -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
-    <!-- docx library for generating Microsoft Word documents -->
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+    <!-- Используем максимально стабильную версию 7.8.2 для работы в Safari -->
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
     
     <style>
         /* Base styles */
@@ -283,30 +283,35 @@
             downloadBtn.className = 'download-btn';
             downloadBtn.textContent = 'Download (DOCX)';
             
-            // ОБНОВЛЕННАЯ ЛОГИКА СОЗДАНИЯ DOCX
             downloadBtn.onclick = async function() {
                 try {
+                    // Проверяем загрузилась ли библиотека docx
+                    if (typeof docx === 'undefined') {
+                        throw new Error("The docx library is not loaded. Please check your internet connection or disable ad-blockers.");
+                    }
+
                     downloadBtn.textContent = 'Generating...';
                     downloadBtn.style.opacity = '0.7';
 
-                    // 1. Получаем картинку с canvas (Data URL)
+                    // 1. Конвертация картинки вручную без fetch() во избежание блокировок Safari
                     const dataUrl = canvas.toDataURL('image/png');
-                    
-                    // 2. Чистая браузерная конвертация в ArrayBuffer через fetch()
-                    const response = await fetch(dataUrl);
-                    const arrayBuffer = await response.arrayBuffer();
+                    const base64 = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+                    const binaryString = window.atob(base64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
 
-                    // 3. Создаем документ Word
+                    // 2. Создание документа Word (формат API версии 7.8.2)
                     const doc = new docx.Document({
                         sections: [{
-                            properties: {},
                             children: [
                                 new docx.Paragraph({
-                                    alignment: docx.AlignmentType.CENTER, // Выравниваем по центру
+                                    alignment: docx.AlignmentType.CENTER,
                                     children: [
                                         new docx.ImageRun({
-                                            data: arrayBuffer,
-                                            type: "png", // ЯВНО указываем тип изображения
+                                            data: bytes,
                                             transformation: {
                                                 width: canvas.width,
                                                 height: canvas.height
@@ -318,26 +323,29 @@
                         }]
                     });
 
-                    // 4. Генерируем Blob
+                    // 3. Создаем Blob
                     const blob = await docx.Packer.toBlob(doc);
 
-                    // 5. Запускаем скачивание
+                    // 4. Скачивание
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = `royaldrugs-barcode-${value}.docx`;
                     document.body.appendChild(link);
                     link.click();
-                    document.body.removeChild(link);
                     
-                    URL.revokeObjectURL(url);
+                    // Убираем за собой
+                    document.body.removeChild(link);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000); // Тайм-аут для Safari
                     
                     downloadBtn.textContent = 'Download (DOCX)';
                     downloadBtn.style.opacity = '1';
                     
                 } catch (err) {
-                    console.error("Error creating DOCX: ", err);
-                    alert("An error occurred while creating the Word document.");
+                    console.error(err);
+                    // ТЕПЕРЬ ОШИБКА ВЫВЕДЕТ КОНКРЕТНУЮ ПРИЧИНУ
+                    alert("System Error: " + (err.message || "Unknown error occurred"));
+                    
                     downloadBtn.textContent = 'Download (DOCX)';
                     downloadBtn.style.opacity = '1';
                 }
