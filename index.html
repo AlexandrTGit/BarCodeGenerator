@@ -50,10 +50,10 @@
     <main>
         <div class="card">
             <h1>Barcode Generator</h1>
-            <p class="subtitle">Enter a numeric value to generate and save a barcode</p>
+            <p class="subtitle">Enter letters, numbers, or hyphens to generate and save a barcode</p>
             
             <div class="input-group">
-                <input type="text" id="barcodeInput" aria-label="Barcode value input" placeholder="Enter digits (e.g., 123456789123)" autocomplete="off">
+                <input type="text" id="barcodeInput" aria-label="Barcode value input" placeholder="Enter code (e.g., RD-123456-A)" autocomplete="off">
                 <button class="btn-primary" onclick="generateBarcode()">Generate</button>
             </div>
             <div id="errorMsg" class="error-msg"></div>
@@ -73,8 +73,15 @@
             const value = inputField.value.trim();
             const errorMsg = document.getElementById('errorMsg');
 
-            if (!value) { errorMsg.textContent = 'Please enter a value for the barcode.'; return; }
-            if (!/^\d+$/.test(value)) { errorMsg.textContent = 'Only digits are allowed. Please check your input.'; return; }
+            if (!value) { 
+                errorMsg.textContent = 'Please enter a value for the barcode.'; 
+                return; 
+            }
+            // Разрешены латинские буквы (A-Z, a-z), цифры (0-9) и дефис (-)
+            if (!/^[a-zA-Z0-9-]+$/.test(value)) { 
+                errorMsg.textContent = 'Only letters, numbers, and hyphens (-) are allowed.'; 
+                return; 
+            }
             
             errorMsg.textContent = ''; 
 
